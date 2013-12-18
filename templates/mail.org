@@ -1,0 +1,8 @@
+#+OPTIONS:   num:nil toc:nil 
+#+BIND: org-export-html-preamble nil
+#+BIND: org-export-html-postamble nil
+#+TITLE: 
+
+
+Thanks,\\
+Ivan
