@@ -146,6 +146,25 @@ This function is called by `org-babel-execute-src-block'."
 
 (use-package ledger-mode :ensure t)
 
+(use-package direx
+   :init (setq direx:closed-icon "▶ "
+	       direx:open-icon "▼ ")
+   :bind ("C-x j" . direx:jump-to-directory)
+   :ensure t)
+
+(use-package smartparens
+  :config (progn
+	    (require 'smartparens-config)
+	    (setq sp-base-key-bindings 'paredit
+		  sp-autoskip-closing-pair 'always)
+	    (sp-use-paredit-bindings)
+	    (show-smartparens-global-mode +1)
+	    (smartparens-global-mode +1)
+	    (global-set-key (kbd "M-(") (lambda (&optional arg) (interactive "P") (sp-wrap-with-pair "(")))
+	    (global-set-key (kbd "M-[") (lambda (&optional arg) (interactive "P") (sp-wrap-with-pair "[")))
+	    (global-set-key (kbd "M-\"") (lambda (&optional arg) (interactive "P") (sp-wrap-with-pair "\""))))
+  :ensure t)
+
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
 (setq exec-path (append exec-path '("/usr/local/bin")))
 
@@ -153,5 +172,8 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; Appearance
 (tool-bar-mode -1)
-(menu-bar-mode nil)m
+(setq menu-bar-mode nil)
+(setq scroll-bar-mode nil)
 (setq confirm-kill-emacs 'y-or-n-p)
+
+(server-start)
