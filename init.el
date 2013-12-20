@@ -165,10 +165,15 @@ This function is called by `org-babel-execute-src-block'."
 	    (global-set-key (kbd "M-\"") (lambda (&optional arg) (interactive "P") (sp-wrap-with-pair "\""))))
   :ensure t)
 
+(use-package cider :ensure t)
+(use-package dedicated :ensure t)
+
+(use-package find-file-in-git-repo
+  :bind ("s-f" . find-file-in-git-repo)
+  :ensure t)
+
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
 (setq exec-path (append exec-path '("/usr/local/bin")))
-
-
 
 ;; Appearance
 (tool-bar-mode -1)
