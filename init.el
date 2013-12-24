@@ -127,8 +127,8 @@ This function is called by `org-babel-execute-src-block'."
 		))
 
 	    (defun org-babel-prep-session:ecl (session params)
-	      "Return an error because Dot does not support sessions."
-	      (error "Dot does not support sessions"))
+	      "Return an error because ECL does not support sessions."
+	      (error "ECL does not support sessions"))
 
 	    (setq org-ecl-path "/Users/ivaninozemtsev/dropbox/solutions/prepare.py")
 	    (setq org-babel-load-languages (append org-babel-load-languages '((ecl . t)))))
@@ -172,13 +172,34 @@ This function is called by `org-babel-execute-src-block'."
   :bind ("s-f" . find-file-in-git-repo)
   :ensure t)
 
+(use-package jump-char
+  :bind (("M-m" . jump-char-forward) 
+	 ("M-S-m" . jump-char-backward))
+  :ensure t)
+
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
 (setq exec-path (append exec-path '("/usr/local/bin")))
 
 ;; Appearance
 (tool-bar-mode -1)
 (setq menu-bar-mode nil)
-(setq scroll-bar-mode nil)
+(scroll-bar-mode -1)
 (setq confirm-kill-emacs 'y-or-n-p)
-
+(setq column-number-mode t)
 (server-start)
+
+(use-package 
+  edit-server
+  :init (edit-server-start)
+  :ensure t)
+
+(use-package scala-mode2 :ensure t)
+
+(use-package ensime 
+  :init (add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
+  :ensure t)
+
+
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+(setq ediff-split-window-function 'split-window-horizontally)
+(setq highlight-nonselected-windows t)
