@@ -33,16 +33,14 @@
 	   "ЙЦУКЕН keyboard layout widely used in Russia (ISO 8859-5 encoding)
   in assuming that your default keyboard layout is dvorak"
 	   nil t t t t nil nil nil nil nil t)
-	  (quail-define-rules ("1" ?1) ("2" ?2) ("3" ?3) ("4" ?4) ("5" ?5) ("6" ?6) ("7" ?7) ("8" ?8) ("9" ?9) ("0" ?0) ("[" ?-) ("]" ?=) ("`" ?ё) ("'" ?й) ("," ?ц) ("." ?у) ("p" ?к)
-	   ("y" ?е) ("f" ?н) ("g" ?г) ("c" ?ш) ("r" ?щ) ("l" ?з) ("/" ?х) ("=" ?ъ) ("a" ?ф)
-	   ("o" ?ы) ("e" ?в) ("u" ?а) ("i" ?п) ("d" ?р) ("h" ?о) ("t" ?л) ("n" ?д) ("s" ?ж)
-	   ("-" ?э) ("\\" ?\\) (";" ?я) ("q" ?ч) ("j" ?с) ("k" ?м) ("x" ?и) ("b" ?т) ("m" ?ь)
-	   ("w" ?б) ("v" ?ю) ("z" ?.) ("!" ?!) ("@" ?\") ("#" ?') ("$" ?\;) ("%" ?%) ("^" ?:)
-	   ("&" ??) ("*" ?*) ("(" ?() (")" ?)) ("{" ?_) ("}" ?+) ("~" ?Ё) ("\"" ?Й) ("<" ?Ц)
-	   (">" ?У) ("P" ?К) ("Y" ?Е) ("F" ?Н) ("G" ?Г) ("C" ?Ш) ("R" ?Щ) ("L" ?З) ("?" ?Х)
-	   ("+" ?Ъ) ("A" ?Ф) ("O" ?Ы) ("E" ?В) ("U" ?А) ("I" ?П) ("D" ?Р) ("H" ?О) ("T" ?Л)
-	   ("N" ?Д) ("S" ?Ж) ("_" ?Э) ("|" ?/) (":" ?Я) ("Q" ?Ч) ("J" ?С) ("K" ?М) ("X" ?И)
-	   ("B" ?Т) ("M" ?Ь) ("W" ?Б) ("V" ?Ю) ("Z" ?,))
+	  (quail-define-rules ("1" ?1) ("2" ?2) ("3" ?3) ("4" ?4) ("5" ?5) ("6" ?6) ("7" ?7) ("8" ?8) ("9" ?9) ("0" ?0) ("[" ?-) ("]" ?=) ("`" ?ё) 
+			      ("'" ?й) ("," ?ц) ("." ?у) ("p" ?к) ("y" ?е) ("f" ?н) ("g" ?г) ("c" ?ш) ("r" ?щ) ("l" ?з) ("/" ?х) ("=" ?ъ) 
+			      ("a" ?ф) ("o" ?ы) ("e" ?в) ("u" ?а) ("i" ?п) ("d" ?р) ("h" ?о) ("t" ?л) ("n" ?д) ("s" ?ж) ("-" ?э) ("\\" ?\\) 
+			      (";" ?я) ("q" ?ч) ("j" ?с) ("k" ?м) ("x" ?и) ("b" ?т) ("m" ?ь) ("w" ?б) ("v" ?ю) ("z" ?.) 
+			      ("!" ?!) ("@" ?\") ("#" ?') ("$" ?\;) ("%" ?%) ("^" ?:) ("&" ??) ("*" ?*) ("(" ?() (")" ?)) ("{" ?_) ("}" ?+) ("~" ?Ё) 
+			      ("\"" ?Й) ("<" ?Ц) (">" ?У) ("P" ?К) ("Y" ?Е) ("F" ?Н) ("G" ?Г) ("C" ?Ш) ("R" ?Щ) ("L" ?З) ("?" ?Х) ("+" ?Ъ) 
+			      ("A" ?Ф) ("O" ?Ы) ("E" ?В) ("U" ?А) ("I" ?П) ("D" ?Р) ("H" ?О) ("T" ?Л) ("N" ?Д) ("S" ?Ж) ("_" ?Э) ("|" ?/) 
+			      (":" ?Я) ("Q" ?Ч) ("J" ?С) ("K" ?М) ("X" ?И) ("B" ?Т) ("M" ?Ь) ("W" ?Б) ("V" ?Ю) ("Z" ?,))
 	  (setq default-input-method "cyrillic-dvorak")))
 
 (use-package multiple-cursors
@@ -61,6 +59,17 @@
 (use-package org
   :init (progn 
 	  (add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
+	  (defun insert-jira-link (id)
+	    "Insert org-mode link to jira"
+	    (interactive "sKEY: ")
+	    (set 'id (upcase id))
+	    (insert (format "[[http://jira4.xored.com/browse/%s][%s]]" id id)))
+
+	  (defun insert-support-link (id)
+	    "Insert org-mode link to helpdesk"
+	    (interactive "N")
+	    (insert (format "[[http://support.xored.com/helpdesk/tickets/%d][#%d]]" id id)))
+
 	  (defun new-mail (topic)
 	    "Start typing org-mode mail now"
 	    (interactive "sTOPIC: ")
@@ -132,7 +141,8 @@ This function is called by `org-babel-execute-src-block'."
 
 	    (setq org-ecl-path "/Users/ivaninozemtsev/dropbox/solutions/prepare.py")
 	    (setq org-babel-load-languages (append org-babel-load-languages '((ecl . t)))))
-
+  :bind (("C-c s" . insert-support-link)
+	 ("C-c j" . insert-jira-link))
   :ensure t)
 
 (use-package load-dir
@@ -147,10 +157,10 @@ This function is called by `org-babel-execute-src-block'."
 (use-package ledger-mode :ensure t)
 
 (use-package direx
-   :init (setq direx:closed-icon "▶ "
-	       direx:open-icon "▼ ")
-   :bind ("C-x j" . direx:jump-to-directory)
-   :ensure t)
+  :init (setq direx:closed-icon "▶ "
+	      direx:open-icon "▼ ")
+  :bind ("C-x j" . direx:jump-to-directory)
+  :ensure t)
 
 (use-package smartparens
   :config (progn
@@ -199,7 +209,9 @@ This function is called by `org-babel-execute-src-block'."
   :init (add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
   :ensure t)
 
-
+(use-package ntcmd
+  :ensure t)
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
 (setq highlight-nonselected-windows t)
+(add-hook 'prog-mode-hook 'subword-mode)
