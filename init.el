@@ -65,6 +65,11 @@
 	    (set 'id (upcase id))
 	    (insert (format "[[http://jira4.xored.com/browse/%s][%s]]" id id)))
 
+	  (defun insert-ecl-link (id)
+	    "Insert org-mode link to jira"
+	    (interactive "sCOMMAND: ")
+	    (insert (format "[[http://download.xored.com/q7/docs/ecl-api/latest#%s][%s]]" id id)))
+
 	  (defun insert-support-link (id)
 	    "Insert org-mode link to helpdesk"
 	    (interactive "N")
@@ -83,7 +88,8 @@
 			 tmpfile)
 	      (find-file tmpfile)
 	      (next-line 5)))
-	  (setq org-export-allow-BIND t
+	  (setq org-tags-column 0
+		org-export-allow-BIND t
 		org-export-allow-bind-keywords t
 		org-confirm-babel-evaluate nil
 		org-src-lang-modes '(("ecl" . fundamental)
@@ -142,7 +148,8 @@ This function is called by `org-babel-execute-src-block'."
 	    (setq org-ecl-path "/Users/ivaninozemtsev/dropbox/solutions/prepare.py")
 	    (setq org-babel-load-languages (append org-babel-load-languages '((ecl . t)))))
   :bind (("C-c s" . insert-support-link)
-	 ("C-c j" . insert-jira-link))
+	 ("C-c j" . insert-jira-link)
+	 ("C-c e" . insert-ecl-link))
   :ensure t)
 
 (use-package load-dir
@@ -215,3 +222,47 @@ This function is called by `org-babel-execute-src-block'."
 (setq ediff-split-window-function 'split-window-horizontally)
 (setq highlight-nonselected-windows t)
 (add-hook 'prog-mode-hook 'subword-mode)
+
+(set-face-attribute 'default nil :font "Anonymous Pro-14")
+
+(use-package deft
+  :init (setq deft-extension "org"
+	      deft-directory "~/dropbox/notes/mails"
+	      deft-text-mode 'org-mode)
+  :config (progn
+	    (defun deft-parse-title (file contents)
+	      "Get title from MY notes"
+	      (when-let
+	       (result
+		(catch 'return
+		  (when-let
+		   (org-title (progn
+				(string-match "^#\\+TITLE:\s*\\([^\s].+\\)+$" contents)
+				(match-string 1 contents)))
+		   (throw 'return org-title))
+		  (when-let
+		   (begin (string-match "^[^#].+$" contents))
+		   (throw 'return (substring contents begin (match-end 0))))))
+	       (funcall deft-parse-title-function result))))
+  :ensure t)
+
+
+;; make zap-to-char act like zap-up-to-char
+(defadvice zap-to-char (after my-zap-to-char-advice (arg char) activate)
+  "Kill up to the ARG'th occurence of CHAR, and leave CHAR.
+  The CHAR is replaced and the point is put before CHAR."
+  (insert char)
+  (forward-char -1))
+
+(global-set-key (kbd "C-|")
+		(lambda (&optional arg) (interactive "P")
+		  (let ((windows (window-list)))
+		    (when (= 2 (length windows))
+		      (let ((first-window (car windows))
+			    (second-buffer (window-buffer (nth 1 windows))))
+			(delete-other-windows first-window)
+			(set-window-buffer (split-window-right) second-buffer))))))
+
+(global-set-key (kbd "C-x 5")
+		(lambda (&optional arg) (interactive "P")
+		  (split-window-right (/ (window-total-width) 3))))
