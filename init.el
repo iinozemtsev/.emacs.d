@@ -246,7 +246,8 @@ This function is called by `org-babel-execute-src-block'."
 	       (funcall deft-parse-title-function result))))
   :ensure t)
 
-
+(use-package wgrep
+  :ensure t)
 ;; make zap-to-char act like zap-up-to-char
 (defadvice zap-to-char (after my-zap-to-char-advice (arg char) activate)
   "Kill up to the ARG'th occurence of CHAR, and leave CHAR.
