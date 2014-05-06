@@ -102,7 +102,11 @@
 				     ("calc" . fundamental)
 				     ("C" . c)
 				     ("cpp" . c++)
-				     ("screen" . shell-script)))
+				     ("screen" . shell-script))
+		org-agenda-files (list "~/dropbox/notes/gtd")
+		org-default-notes-file "~/dropbox/notes/gtd/inbox.org"
+		org-refile-targets  '((nil :maxlevel . 9)
+				    (org-agenda-files :maxlevel . 9)))
 	  (org-babel-do-load-languages
 	   'org-babel-load-languages
 	   '(   (sh . t)
@@ -149,7 +153,11 @@ This function is called by `org-babel-execute-src-block'."
 	    (setq org-babel-load-languages (append org-babel-load-languages '((ecl . t)))))
   :bind (("C-c s" . insert-support-link)
 	 ("C-c j" . insert-jira-link)
-	 ("C-c e" . insert-ecl-link))
+	 ("C-c e" . insert-ecl-link)
+	 ("s-t" . org-todo-list)
+	 ("s-s" . org-schedule)
+	 ("s-a" . org-agenda)
+	 ("s-c" . org-capture))
   :ensure t)
 
 (use-package load-dir
@@ -161,7 +169,27 @@ This function is called by `org-babel-execute-src-block'."
   :ensure t)
 
 
-(use-package ledger-mode :ensure t)
+(defun get-line (num)
+  (let ((actual (+ num 1)))
+    (buffer-substring-no-properties
+     (line-beginning-position actual)
+     (line-end-position actual))))
+
+(use-package s :ensure t)
+(defun insert-ledger-timestamp () "Add YYYY/MM/DD"
+       (interactive)
+       (let ((curr-line (s-trim (get-line 0))) (prev-line (s-trim (get-line -1))))
+	 (if (> (length curr-line) 0)
+	     (insert "\n\n")
+	   (if (> (length prev-line) 0)
+	       (insert "\n")
+	     (let ((len (length (get-line 0))))
+	       (delete-backward-char len))))
+	 (insert (format-time-string "%Y/%m/%d "))))
+
+(use-package ledger-mode
+  :bind (("C-c t" . insert-ledger-timestamp))
+  :ensure t)
 
 (use-package direx
   :init (setq direx:closed-icon "▶ "
@@ -267,3 +295,10 @@ This function is called by `org-babel-execute-src-block'."
 (global-set-key (kbd "C-x 5")
 		(lambda (&optional arg) (interactive "P")
 		  (split-window-right (/ (window-total-width) 3))))
+
+(defun gtd () "" (interactive) (find-file "~/dropbox/notes/gtd/work.org"))
+
+(defun ldg () "" (interactive) (find-file "~/dropbox/appdata/ledger/ledger.txt"))
+
+(defun kill-back () "" (interactive) (kill-sexp -1))
+(global-set-key [C-M-backspace] 'kill-back)
