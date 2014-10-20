@@ -263,8 +263,8 @@ This function is called by `org-babel-execute-src-block'."
 ;; (use-package cider :ensure t)
 (use-package dedicated :ensure t)
 
-(use-package find-file-in-git-repo
-  :bind ("s-f" . find-file-in-git-repo)
+(use-package find-file-in-repository
+  :bind ("s-f" . find-file-in-repository)
   :ensure t)
 
 (use-package jump-char
@@ -403,3 +403,7 @@ This function is called by `org-babel-execute-src-block'."
 (global-set-key (kbd "s-/") 'my-replace)
 
 (use-package nginx-mode :ensure t)
+
+(use-package markdown-mode :ensure t)
+
+(use-package lua-mode :ensure t)
