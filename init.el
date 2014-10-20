@@ -8,6 +8,7 @@
 (require 'use-package)
 
 (global-unset-key (kbd "s-m"))
+(global-unset-key (kbd "M-\\"))
 
 (use-package magit 
   :bind (("M-g s" . magit-status)
@@ -22,9 +23,10 @@
 	  (window-number-meta-mode 1))
   :ensure t)
 
-(use-package unicode-fonts
-  :init (unicode-fonts-setup)
-  :ensure t)
+(if (display-graphic-p)
+    (use-package unicode-fonts
+      :init (unicode-fonts-setup)
+      :ensure t))
 
 (use-package quail
   :init (progn 
@@ -179,19 +181,20 @@ This function is called by `org-babel-execute-src-block'."
   :init (setq load-dirs t)
   :ensure t)
 
-(use-package graphviz-dot-mode
-  :init (progn
-	  (setq graphviz-dot-view-command "dot -Tpng %s | open -f -a Preview.app")
+(if (display-graphic-p)
+    (use-package graphviz-dot-mode
+      :init (progn
+	      (setq graphviz-dot-view-command "dot -Tpng %s | open -f -a Preview.app")
 
-	  (defun my-dot-preview () "" (interactive)
-		 (let ((cb (current-buffer)))
-		   (save-buffer)
-		   (compile compile-command)
-		   (sleep-for 1)
-		   (graphviz-dot-preview)))
-	  (add-hook 'graphviz-dot-mode-hook (lambda () (add-hook 'after-save-hook 'my-dot-preview nil 'make-it-local))))
-  :bind (("s-p" . my-dot-preview))
-  :ensure t)
+	      (defun my-dot-preview () "" (interactive)
+		(let ((cb (current-buffer)))
+		  (save-buffer)
+		  (compile compile-command)
+		  (sleep-for 1)
+		  (graphviz-dot-preview)))
+	      (add-hook 'graphviz-dot-mode-hook (lambda () (add-hook 'after-save-hook 'my-dot-preview nil 'make-it-local))))
+      :bind (("s-p" . my-dot-preview))
+      :ensure t))
 
 
 (defun get-line (num)
@@ -257,7 +260,7 @@ This function is called by `org-babel-execute-src-block'."
 	    (global-set-key (kbd "M-\"") (lambda (&optional arg) (interactive "P") (sp-wrap-with-pair "\""))))
   :ensure t)
 
-(use-package cider :ensure t)
+;; (use-package cider :ensure t)
 (use-package dedicated :ensure t)
 
 (use-package find-file-in-git-repo
@@ -274,20 +277,26 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; Appearance
 (tool-bar-mode -1)
-(setq menu-bar-mode nil)
-(scroll-bar-mode -1)
+(menu-bar-mode -1)
+
+(if (display-graphic-p)
+    (scroll-bar-mode -1))
 (setq confirm-kill-emacs 'y-or-n-p)
 (setq column-number-mode t)
-(server-start)
 
-(use-package 
-  edit-server
-  :init (edit-server-start)
-  :ensure t)
+(if (display-graphic-p)
+    (server-start))
+
+
+(if (display-graphic-p)
+    (use-package 
+      edit-server
+      :init (edit-server-start)
+      :ensure t))
 
 (use-package scala-mode2 :ensure t)
 
-(use-package ensime 
+'(use-package ensime 
   :init (add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
   :ensure t)
 
@@ -298,28 +307,30 @@ This function is called by `org-babel-execute-src-block'."
 (setq highlight-nonselected-windows t)
 (add-hook 'prog-mode-hook 'subword-mode)
 
-(set-face-attribute 'default nil :font "Anonymous Pro-14")
+(if (display-graphic-p)
+    (set-face-attribute 'default nil :font "Anonymous Pro-14"))
 
-(use-package deft
-  :init (setq deft-extension "org"
-	      deft-directory "~/dropbox/notes/mails"
-	      deft-text-mode 'org-mode)
-  :config (progn
-	    (defun deft-parse-title (file contents)
-	      "Get title from MY notes"
-	      (when-let
-	       (result
-		(catch 'return
+(if (display-graphic-p)
+    (use-package deft
+      :init (setq deft-extension "org"
+		  deft-directory "~/dropbox/notes/mails"
+		  deft-text-mode 'org-mode)
+      :config (progn
+		(defun deft-parse-title (file contents)
+		  "Get title from MY notes"
 		  (when-let
-		   (org-title (progn
-				(string-match "^#\\+TITLE:\s*\\([^\s].+\\)+$" contents)
-				(match-string 1 contents)))
-		   (throw 'return org-title))
-		  (when-let
-		   (begin (string-match "^[^#].+$" contents))
-		   (throw 'return (substring contents begin (match-end 0))))))
-	       (funcall deft-parse-title-function result))))
-  :ensure t)
+		   (result
+		    (catch 'return
+		      (when-let
+		       (org-title (progn
+				    (string-match "^#\\+TITLE:\s*\\([^\s].+\\)+$" contents)
+				    (match-string 1 contents)))
+		       (throw 'return org-title))
+		      (when-let
+		       (begin (string-match "^[^#].+$" contents))
+		       (throw 'return (substring contents begin (match-end 0))))))
+		   (funcall deft-parse-title-function result))))
+      :ensure t))
 
 (use-package wgrep
   :ensure t)
@@ -391,3 +402,4 @@ This function is called by `org-babel-execute-src-block'."
 
 (global-set-key (kbd "s-/") 'my-replace)
 
+(use-package nginx-mode :ensure t)
