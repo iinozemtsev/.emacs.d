@@ -50,12 +50,6 @@
 	 ("C-c m" . mc/mark-all-like-this))
   :ensure t)
 
-(use-package dired-details
-  :init (setq dired-use-ls-dired nil)
-  :ensure t)
-
-(use-package dired-details+ :ensure t)
-
 (use-package htmlize :ensure t)
 
 (use-package org
@@ -304,11 +298,36 @@ This function is called by `org-babel-execute-src-block'."
   :ensure t)
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
+
+
+(defvar pre-ediff-window-configuration nil
+  "window configuration to use")
+(defvar new-ediff-frame-to-use nil
+  "new frame for ediff to use")
+(defun save-my-window-configuration ()
+  (interactive)
+  (setq pre-ediff-window-configuration (current-window-configuration))
+  (select-frame-set-input-focus (setq
+				 new-ediff-frame-to-use (new-frame))))
+
+(add-hook 'ediff-before-setup-hook 'save-my-window-configuration)
+(defun restore-my-window-configuration ()
+  (interactive)
+  (when (framep new-ediff-frame-to-use)
+    (delete-frame new-ediff-frame-to-use)
+    (setq new-ediff-frame-to-use nil))
+  (when (window-configuration-p pre-ediff-window-configuration
+				(set-window-configuration pre-ediff-window-configuration))))
+(add-hook 'ediff-after-quit-hook-internal 'restore-my-window-configuration)
+
+
 (setq highlight-nonselected-windows t)
 (add-hook 'prog-mode-hook 'subword-mode)
 
 (if (display-graphic-p)
-    (set-face-attribute 'default nil :font "Anonymous Pro-14"))
+    (progn
+      (set-face-attribute 'default nil :background "#F2F2F2")
+      (set-face-attribute 'default nil :font "Anonymous Pro-12")))
 
 (if (display-graphic-p)
     (use-package deft
@@ -350,7 +369,7 @@ This function is called by `org-babel-execute-src-block'."
 			(delete-other-windows first-window)
 			(set-window-buffer (split-window-right) second-buffer))))))
 
-(global-set-key (kbd "C-x 5")
+'(global-set-key (kbd "C-x 5")
 		(lambda (&optional arg) (interactive "P")
 		  (split-window-right (/ (window-total-width) 3))))
 
@@ -407,3 +426,8 @@ This function is called by `org-babel-execute-src-block'."
 (use-package markdown-mode :ensure t)
 
 (use-package lua-mode :ensure t)
+
+(setq large-file-warning-threshold 500000000)
+
+(use-package twig-mode :ensure t)
+x == 0
