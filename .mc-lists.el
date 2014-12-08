@@ -3,6 +3,8 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+	c-electric-delete-forward
+	c-electric-semi&comma
 	eval-last-sexp
 	indent-for-tab-command
 	isearch-abort

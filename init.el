@@ -405,7 +405,11 @@ This function is called by `org-babel-execute-src-block'."
 		(make-replacement-alist "->" "&#8594;" 0)
 		(make-replacement-alist "..." "&#8230;" 0)		
 		(make-replacement-alist "--" "&ndash;" 0)
-		(make-replacement-alist "<u" "<span class=\"uiElement\"></span>" 7))))
+		(make-replacement-alist "<u" "<span class=\"uiElement\"></span>" 7)
+		(make-replacement-alist "ph" "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n	 xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n  <modelVersion>4.0.0</modelVersion>\n  <groupId></groupId>\n  <artifactId></artifactId>\n  <version>0.0.1-SNAPSHOT</version>\n  <packaging>q7test</packaging>\n</project>" 0)
+		(make-replacement-alist "pb" "<build>\n    <plugins>\n      <plugin>\n	<groupId>com.xored.q7</groupId>\n	<artifactId>q7-maven-plugin</artifactId>\n	<version>${q7-maven-version}</version>\n	<extensions>true</extensions>\n	<configuration>\n	  <aut></aut>\n	  <q7>\n	    <version>${q7-runner-version}</version>\n	  </q7>\n	</configuration>\n      </plugin>\n    </plugins>\n  </build>\n" 0)
+		(make-replacement-alist "pp" "<properties>\n    <q7-runner-version>1.5.3</q7-runner-version>\n    <q7-maven-version>1.5.3</q7-maven-version>\n  </properties>\n" 0)
+		(make-replacement-alist "pr" "<pluginRepositories>\n    <pluginRepository>\n      <id>q7-releases</id>\n      <name>Xored Maven repository</name>\n      <url>http://maven.xored.com/nexus/content/repositories/q7-releases/</url>\n    </pluginRepository>\n  </pluginRepositories>\n" 0))))
  
 (defun make-replacement-alist (from to offset)
   (cons (cons :from from) (cons (cons :to to) (cons (cons :offset offset) nil))))
