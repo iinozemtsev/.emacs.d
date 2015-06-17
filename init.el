@@ -436,7 +436,10 @@ This function is called by `org-babel-execute-src-block'."
                       (company-mode)
                       (company-quickhelp-mode 1)
                       (local-set-key (kbd "M-/") 'company-complete)))
-          (add-hook 'cider-mode-hook #'company-mode)))
+          (add-hook 'cider-mode-hook (lambda ()
+                      (company-mode)
+                      (company-quickhelp-mode 1)
+                      (local-set-key (kbd "M-/") 'company-complete)))))
 
 (use-package easy-kill
   :ensure t

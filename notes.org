@@ -1,0 +1,14 @@
+** TODO Better view of grimoire with  https://github.com/emacs-pe/gh-md.el
+** TODO move hack with patching cider-grimoire to init.el
+   #+BEGIN_SRC elisp
+     (defun cider-create-grimoire-buffer (content)
+       "Create a new grimoire buffer with CONTENT."
+       (with-current-buffer (cider-popup-buffer "*cider grimoire*" t)
+         (read-only-mode -1)
+           ;; this:
+           (insert content)
+           (markdown-mode)
+           (read-only-mode +1)
+           (goto-char (point-min))
+           (current-buffer)))
+   #+END_SRC
