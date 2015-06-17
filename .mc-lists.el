@@ -12,6 +12,7 @@
 	jump-char-process-char
 	kill-region
 	kill-sexp
+	nxml-finish-element
 	sp--self-insert-command
 	sp-forward-slurp-sexp
 	sp-splice-sexp-killing-around

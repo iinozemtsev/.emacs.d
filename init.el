@@ -2,11 +2,13 @@
 
 (package-initialize)
 
+;; ("melpa" . "http://melpa.milkbox.net/packages/")
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+                         ("melpa" . "http://melpa.milkbox.net/packages/")
+                         ("melpa-stable" . "http://stable.melpa.org/packages/")))
 (require 'use-package)
-
+(global-unset-key (kbd "s-z"))
 (global-unset-key (kbd "s-m"))
 (global-unset-key (kbd "M-\\"))
 
@@ -191,26 +193,29 @@ This function is called by `org-babel-execute-src-block'."
       :ensure t))
 
 
-(defun get-line (num)
-  (let ((actual (+ num 1)))
-    (buffer-substring-no-properties
-     (line-beginning-position actual)
-     (line-end-position actual))))
+
 
 (use-package s :ensure t)
-(defun insert-ledger-timestamp () "Add YYYY/MM/DD"
-       (interactive)
-       (let ((curr-line (s-trim (get-line 0))) (prev-line (s-trim (get-line -1))))
-	 (if (> (length curr-line) 0)
-	     (insert "\n\n")
-	   (if (> (length prev-line) 0)
-	       (insert "\n")
-	     (let ((len (length (get-line 0))))
-	       (delete-backward-char len))))
-	 (insert (format-time-string "%Y/%m/%d "))))
+
 
 (use-package ledger-mode
   :bind (("C-c t" . insert-ledger-timestamp))
+  :init (progn
+	  (defun get-line (num)
+	    (let ((actual (+ num 1)))
+	      (buffer-substring-no-properties
+	       (line-beginning-position actual)
+	       (line-end-position actual))))
+	  (defun insert-ledger-timestamp () "Add YYYY/MM/DD"
+		 (interactive)
+		 (let ((curr-line (s-trim (get-line 0))) (prev-line (s-trim (get-line -1))))
+		   (if (> (length curr-line) 0)
+		       (insert "\n\n")
+		     (if (> (length prev-line) 0)
+			 (insert "\n")
+		       (let ((len (length (get-line 0))))
+			 (delete-backward-char len))))
+		   (insert (format-time-string "%Y/%m/%d "))))	  )
   :ensure t)
 
 (use-package direx
@@ -277,7 +282,7 @@ This function is called by `org-babel-execute-src-block'."
     (scroll-bar-mode -1))
 (setq confirm-kill-emacs 'y-or-n-p)
 (setq column-number-mode t)
-
+(setq-default indent-tabs-mode nil)
 (if (display-graphic-p)
     (server-start))
 
@@ -375,6 +380,8 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun gtd () "" (interactive) (find-file "~/dropbox/notes/gtd/work.org"))
 
+(defun fit () "" (interactive) (find-file "~/dropbox/notes/fit.org"))
+
 (defun ldg () "" (interactive) (find-file "~/dropbox/appdata/ledger/ledger.txt"))
 
 (defun kill-back () "" (interactive) (kill-sexp -1))
@@ -394,36 +401,7 @@ This function is called by `org-babel-execute-src-block'."
   :ensure t)
 (use-package php-mode :ensure t)
 
-
-(defun my-replace () "" (interactive)
-       (mapcar (lambda (replacement)
-		 (try-replace
-		  (cdr (assoc :from replacement))
-		  (cdr (assoc :to replacement))
-		  (cdr (assoc :offset replacement))))
-	       (list
-		(make-replacement-alist "->" "&#8594;" 0)
-		(make-replacement-alist "..." "&#8230;" 0)		
-		(make-replacement-alist "--" "&ndash;" 0)
-		(make-replacement-alist "<u" "<span class=\"uiElement\"></span>" 7)
-		(make-replacement-alist "ph" "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n	 xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n  <modelVersion>4.0.0</modelVersion>\n  <groupId></groupId>\n  <artifactId></artifactId>\n  <version>0.0.1-SNAPSHOT</version>\n  <packaging>q7test</packaging>\n</project>" 0)
-		(make-replacement-alist "pb" "<build>\n    <plugins>\n      <plugin>\n	<groupId>com.xored.q7</groupId>\n	<artifactId>q7-maven-plugin</artifactId>\n	<version>${q7-maven-version}</version>\n	<extensions>true</extensions>\n	<configuration>\n	  <aut></aut>\n	  <q7>\n	    <version>${q7-runner-version}</version>\n	  </q7>\n	</configuration>\n      </plugin>\n    </plugins>\n  </build>\n" 0)
-		(make-replacement-alist "pp" "<properties>\n    <q7-runner-version>1.5.3</q7-runner-version>\n    <q7-maven-version>1.5.3</q7-maven-version>\n  </properties>\n" 0)
-		(make-replacement-alist "pr" "<pluginRepositories>\n    <pluginRepository>\n      <id>q7-releases</id>\n      <name>Xored Maven repository</name>\n      <url>http://maven.xored.com/nexus/content/repositories/q7-releases/</url>\n    </pluginRepository>\n  </pluginRepositories>\n" 0))))
- 
-(defun make-replacement-alist (from to offset)
-  (cons (cons :from from) (cons (cons :to to) (cons (cons :offset offset) nil))))
-
-(defun try-replace (from to off)
-  (let* ((len (length from))
-	      (pos (point))
-	      (txt (buffer-substring-no-properties (- pos len) pos)))
-	 (when (string= txt from)
-	   (delete-char (- len))
-	   (insert to)
-	   (backward-char off))))
-
-(global-set-key (kbd "s-/") 'my-replace)
+(global-set-key (kbd "s-/") 'comment-dwim)
 
 (use-package nginx-mode :ensure t)
 
@@ -431,7 +409,36 @@ This function is called by `org-babel-execute-src-block'."
 
 (use-package lua-mode :ensure t)
 
-(setq large-file-warning-threshold 500000000)
+(setq large-file-warning-threshold 150000000)
 
 (use-package twig-mode :ensure t)
 
+(use-package cider
+  :config (progn
+          (setq cider-lein-command "/Users/ivaninozemtsev/bin/lein")
+          (local-set-key (kbd "M-/") 'company-complete))
+  :ensure t)
+
+
+(use-package hydra :ensure t
+  :init (progn
+	  (defhydra hydra-zoom (global-map "s-z")
+	    "zoom"
+	    ("g" text-scale-increase "in")
+	    ("l" text-scale-decrease "out"))))
+
+
+(use-package company
+  :ensure t
+  :init (progn
+          (add-hook 'cider-repl-mode-hook
+                    (lambda ()
+                      (company-mode)
+                      (company-quickhelp-mode 1)
+                      (local-set-key (kbd "M-/") 'company-complete)))
+          (add-hook 'cider-mode-hook #'company-mode)))
+
+(use-package easy-kill
+  :ensure t
+  :config (progn
+            (global-set-key [remap kill-ring-save] 'easy-kill)))
