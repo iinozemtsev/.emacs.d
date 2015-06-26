@@ -259,11 +259,18 @@ This function is called by `org-babel-execute-src-block'."
 	    (global-set-key (kbd "M-\"") (lambda (&optional arg) (interactive "P") (sp-wrap-with-pair "\""))))
   :ensure t)
 
-;; (use-package cider :ensure t)
 (use-package dedicated :ensure t)
 
-(use-package find-file-in-repository
-  :bind ("s-f" . find-file-in-repository)
+(use-package swiper :ensure t
+             :config (progn (ivy-mode 1)
+                            (setq ivy-use-virtual-buffers t)
+                            (global-set-key "\C-s" 'swiper)
+                            (global-set-key "\C-r" 'swiper)
+                            (global-set-key (kbd "C-c C-r") 'ivy-resume)
+                            (global-set-key [f6] 'ivy-resume)))
+
+(use-package find-file-in-project
+  :bind ("s-f" . find-file-in-project)
   :ensure t)
 
 (use-package jump-char
@@ -273,7 +280,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
 (setq exec-path (append exec-path '("/usr/local/bin")))
-
+(setq blink-matching-paren nil)
 ;; Appearance
 (tool-bar-mode -1)
 (menu-bar-mode -1)
