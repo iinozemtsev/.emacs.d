@@ -16,7 +16,9 @@
   :bind (("M-g s" . magit-status)
 	 ("M-g b" . magit-blame-mode)
 	 ("s-m m" . magit-status))
-  :init (setq magit-emacsclient-executable "/usr/local/bin/emacsclient")
+  :init (setq
+         magit-last-seen-setup-instructions "1.4.0"
+         magit-emacsclient-executable "/usr/local/bin/emacsclient")
   :ensure t)
 
 (use-package window-number
@@ -107,6 +109,7 @@
 				     ("C" . c)
 				     ("cpp" . c++)
 				     ("screen" . shell-script))
+                org-log-done 'time
 		org-agenda-files (list "~/dropbox/notes/gtd")
 		org-default-notes-file "~/dropbox/notes/gtd/inbox.org"
 		org-refile-targets  '((nil :maxlevel . 9)
@@ -183,12 +186,13 @@ This function is called by `org-babel-execute-src-block'."
 	      (setq graphviz-dot-view-command "dot -Tpng %s | open -f -a Preview.app")
 
 	      (defun my-dot-preview () "" (interactive)
-		(let ((cb (current-buffer)))
+		(progn
 		  (save-buffer)
 		  (compile compile-command)
 		  (sleep-for 1)
 		  (graphviz-dot-preview)))
-	      (add-hook 'graphviz-dot-mode-hook (lambda () (add-hook 'after-save-hook 'my-dot-preview nil 'make-it-local))))
+	      (add-hook 'graphviz-dot-mode-hook
+                        (lambda () (add-hook 'after-save-hook 'my-dot-preview nil t))))
       :bind (("s-p" . my-dot-preview))
       :ensure t))
 
@@ -264,6 +268,7 @@ This function is called by `org-babel-execute-src-block'."
 (use-package swiper :ensure t
              :config (progn (ivy-mode 1)
                             (setq ivy-use-virtual-buffers t)
+                            (setq ido-use-faces nil)
                             (global-set-key "\C-s" 'swiper)
                             (global-set-key "\C-r" 'swiper)
                             (global-set-key (kbd "C-c C-r") 'ivy-resume)
@@ -278,7 +283,7 @@ This function is called by `org-babel-execute-src-block'."
 	 ("M-S-m" . jump-char-backward))
   :ensure t)
 
-(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+(setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
 (setq exec-path (append exec-path '("/usr/local/bin")))
 (setq blink-matching-paren nil)
 ;; Appearance
@@ -338,8 +343,18 @@ This function is called by `org-babel-execute-src-block'."
 
 (if (display-graphic-p)
     (progn
-      (set-face-attribute 'default nil :background "#F2F2F2")
+      (load-theme 'tango-dark t)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (select-frame frame)
+                  (load-theme 'tango-dark t)
+                  (set-face-attribute 'default nil :background "#212526")))
+      (set-face-attribute 'default nil :background "#212526")
       (set-face-attribute 'default nil :font "Anonymous Pro-12")))
+
+
+
+
 
 (if (display-graphic-p)
     (use-package deft
@@ -452,3 +467,18 @@ This function is called by `org-babel-execute-src-block'."
   :ensure t
   :config (progn
             (global-set-key [remap kill-ring-save] 'easy-kill)))
+
+(use-package image+ :ensure t
+  :init (eval-after-load 'image '(require 'image+))
+  :config (defhydra imagex-sticky-binding (global-map "C-x C-l")
+            "Manipulating Image"
+            ("+" imagex-sticky-zoom-in "zoom in")
+            ("-" imagex-sticky-zoom-out "zoom out")
+            ("M" imagex-sticky-maximize "maximize")
+            ("O" imagex-sticky-restore-original "restore original")
+            ("S" imagex-sticky-save-image "save file")
+            ("r" imagex-sticky-rotate-right "rotate right")
+            ("l" imagex-sticky-rotate-left "rotate left")))
+
+(global-set-key (kbd "C-. C-f") (lambda (&optional arg) (interactive "P") (insert "→")))
+(global-set-key (kbd "C-. C--") (lambda (&optional arg) (interactive "P") (insert "–")))
