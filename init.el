@@ -289,6 +289,7 @@ This function is called by `org-babel-execute-src-block'."
 ;; Appearance
 (tool-bar-mode -1)
 (menu-bar-mode -1)
+(blink-cursor-mode -1)
 
 (if (display-graphic-p)
     (scroll-bar-mode -1))
@@ -482,3 +483,9 @@ This function is called by `org-babel-execute-src-block'."
 
 (global-set-key (kbd "C-. C-f") (lambda (&optional arg) (interactive "P") (insert "→")))
 (global-set-key (kbd "C-. C--") (lambda (&optional arg) (interactive "P") (insert "–")))
+
+
+(define-key key-translation-map [?\C-h] [?\C-?])
+(global-set-key (kbd "C-x ?") 'help-command)
+(global-set-key (kbd "M-h") 'subword-backward-kill)
+(global-set-key (kbd "C-M-h") 'kill-back)
