@@ -1,7 +1,0 @@
-#+OPTIONS:   num:nil toc:nil author:nil email:nil creator:nil timestamp:nil
-#+BIND: org-html-validation-link nil
-#+TITLE: 
-
-
-Thanks,\\
-Ivan
