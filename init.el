@@ -1,3 +1,7 @@
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(when (file-exists-p custom-file)
+  (load custom-file))
+
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 
 (require 'use-package)
@@ -42,15 +46,8 @@
                               "<:<" ";;;"))
   (global-ligature-mode t) :ensure t)
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages '(ligature window-numbering magit lua-mode)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+(if (eq system-type 'darwin)
+    (progn
+      (setq mac-command-modifier 'meta)
+      (setq mac-right-command-modifier 'super)
+      (set-frame-font "JetBrains Mono 20" nil t)))
