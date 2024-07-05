@@ -56,13 +56,31 @@
    "C-M-p" #'vertico-previous-group)
   :custom
   (vertico-count 13)                    ; Number of candidates to display
-  (vertico-resize t)
+  (vertico-resize 'grow-only)
   (vertico-cycle nil) ; Go from last to first candidate and first to last (cycle)?
   :config
   (vertico-mode))
 
+(use-package swift-mode :straight t)
+
+(use-package dired
+  :init
+  (defun my-hide-details ()
+    (dired-hide-details-mode 1))
+  :hook ('dired-mode . my-hide-details))
+
+(use-package smartparens :straight t
+  :config
+  (require 'smartparens-config)
+  :init
+  (show-smartparens-global-mode +1)
+  (smartparens-global-mode +1)
+  (sp-use-paredit-bindings)
+  :custom (sp-escape-quotes-after-insert nil))
+
 (if (display-graphic-p)
     (scroll-bar-mode -1))
+
 (setq confirm-kill-emacs 'y-or-n-p)
 (if (display-graphic-p)
     (server-start))
