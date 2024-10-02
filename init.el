@@ -34,6 +34,16 @@
 
 (use-package general :straight t)
 
+(use-package bazel :straight t)
+
+(use-package gn-mode
+  :straight t
+  :init
+  (add-to-list 'auto-mode-alist '("\\.gn\\'" . gn-mode))
+  (add-to-list 'auto-mode-alist '("\\.gni\\'" . gn-mode)))
+
+(use-package consult :straight t)
+
 (use-package vertico
   ;; Special recipe to load extensions conveniently
   :straight (vertico :files (:defaults "extensions/*")
@@ -92,6 +102,10 @@
   (window-numbering-mode 1)
   :straight t)
 
+(use-package pcre2el
+  :config (pcre-mode)
+  :straight t)
+
 (use-package magit 
   :bind (("M-g s" . magit-status))
   :straight t)
@@ -124,19 +138,49 @@
 (use-package dart-mode :straight t)
 (use-package markdown-mode :straight t)
 (use-package vscdark-theme :straight t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-enabled-themes nil)
- '(custom-safe-themes
-   '("449a6a03953bf946290f1a0eac09a7de2cf2556aa890f28ad2510a494eb23dcb" "993aac313027a1d6e70d45b98e121492c1b00a0daa5a8629788ed7d523fe62c1" default))
- '(package-selected-packages
-   '(vscdark-theme vscode-dark-plus-theme dart-mode ligature window-numbering magit lua-mode)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+(use-package multiple-cursors
+  :bind (("C-c a" . mc/edit-lines)
+         ("C-c m" . mc/mark-all-like-this))
+  :straight t)
+
+(defun toggle-quotes ()
+  "Toggle single/double quotes and flip the internal quotes."
+  (interactive)
+  (save-excursion
+    (re-search-backward "[\"']")
+    (let* ((start (point))
+           (old-c (char-after start))
+           new-c)
+      (setq new-c
+            (cl-case old-c
+              (?\" "'")
+              (?\' "\"")))
+      (setq old-c (char-to-string old-c))
+      (delete-char 1)
+      (insert new-c)
+      (re-search-forward old-c)
+      (backward-char 1)
+      (let ((end (point)))
+        (delete-char 1)
+        (insert new-c)
+        (replace-string new-c old-c nil (1+ start) end)))))
+(global-set-key (kbd "M-\"") 'toggle-quotes)
+(global-set-key (kbd "M-g f") 'project-find-file)
+(global-set-key (kbd "C-c C-r") 'ff-find-other-file)
+(setq-default indent-tabs-mode nil)
+
+(use-package company :straight t
+  :config (global-company-mode))
+
+(use-package eglot
+  :bind
+  ("C-c C-f" . eglot-format-buffer)
+  ("M-g ?" . eldoc-doc-buffer)
+  ("M-g u" . eglot-code-actions)
+  ("M-RET" . eglot-code-actions)
+  ("M-g e" . eglot-rename)
+  ("M-n n ". flymake-goto-next-error)
+  ("M-n p ". flymake-goto-prev-error)
+  ("M-g i ". eglot-inlay-hints-mode)
+  ("M-/" . company-complete))
