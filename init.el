@@ -110,6 +110,9 @@
   :bind (("M-g s" . magit-status))
   :straight t)
 
+(use-package markdownfmt
+  :straight t)
+
 (set-frame-font "JetBrains Mono 12" nil t)
 
 (use-package ligature
