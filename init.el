@@ -205,7 +205,7 @@
   (defun my/smart-clipboard-cut (text &optional push)
     (if (display-graphic-p)
         (when (fboundp 'gui-select-text)
-          (gui-select-text text push))
+          (gui-select-text text))
       (my/yank-to-clipboard-osc52 text push)))
 
   ;; 3. Hook it into the kill-ring
