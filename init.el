@@ -98,7 +98,7 @@
     (server-start))
 
 (use-package window-numbering
-  :init 
+  :init
   (window-numbering-mode 1)
   :straight t)
 
@@ -106,7 +106,7 @@
   :config (pcre-mode)
   :straight t)
 
-(use-package magit 
+(use-package magit
   :bind (("M-g s" . magit-status))
   :straight t)
 
@@ -187,3 +187,26 @@
   ("M-n p ". flymake-goto-prev-error)
   ("M-g i ". eglot-inlay-hints-mode)
   ("M-/" . company-complete))
+
+(use-package my-terminal-keyboard
+  :no-require t
+  :ensure nil
+  :config
+  ;; 1. Define the OSC 52 function
+  (defun my/yank-to-clipboard-osc52 (text &optional push)
+    (let ((inhibit-eol-conversion t)
+          (base64-text (base64-encode-string
+                        (encode-coding-string text 'utf-8)
+                        t)))
+      (send-string-to-terminal
+       (format "\e]52;c;%s\a" base64-text))))
+
+  ;; 2. Define the Smart Dispatcher (Terminal vs GUI)
+  (defun my/smart-clipboard-cut (text &optional push)
+    (if (display-graphic-p)
+        (when (fboundp 'gui-select-text)
+          (gui-select-text text push))
+      (my/yank-to-clipboard-osc52 text push)))
+
+  ;; 3. Hook it into the kill-ring
+  (setq interprogram-cut-function 'my/smart-clipboard-cut))
