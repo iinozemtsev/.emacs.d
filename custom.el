@@ -3,7 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes nil)
+ '(custom-enabled-themes '(wombat))
  '(custom-safe-themes
    '("449a6a03953bf946290f1a0eac09a7de2cf2556aa890f28ad2510a494eb23dcb" "993aac313027a1d6e70d45b98e121492c1b00a0daa5a8629788ed7d523fe62c1" default))
  '(package-selected-packages
