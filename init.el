@@ -36,6 +36,8 @@
 
 (use-package bazel :straight t)
 
+(use-package yaml-mode :straight t)
+
 (use-package gn-mode
   :straight t
   :init
@@ -43,6 +45,8 @@
   (add-to-list 'auto-mode-alist '("\\.gni\\'" . gn-mode)))
 
 (use-package consult :straight t)
+
+(use-package csv-mode :straight t)
 
 (use-package vertico
   ;; Special recipe to load extensions conveniently
@@ -186,6 +190,7 @@
   ("M-n n ". flymake-goto-next-error)
   ("M-n p ". flymake-goto-prev-error)
   ("M-g i ". eglot-inlay-hints-mode)
+  ("M-g r" . vc-git-grep)
   ("M-/" . company-complete))
 
 (use-package my-terminal-keyboard
@@ -210,3 +215,11 @@
 
   ;; 3. Hook it into the kill-ring
   (setq interprogram-cut-function 'my/smart-clipboard-cut))
+(setq backup-by-copying t
+      backup-directory-alist '(("." . "~/.emacs.d/auto-saves"))
+      delete-old-versions t)
+
+(setq auto-save-file-name-transforms
+  `((".*" "~/.emacs.d/auto-saves/" t)))
+
+(setq column-number-mode t)
