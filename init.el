@@ -63,6 +63,7 @@
                                 vertico-multiform
                                 vertico-unobtrusive
                                 ))
+  :demand t
   :general
   (:keymaps 'vertico-map
    "<tab>" #'vertico-insert    ; Choose selected candidate
