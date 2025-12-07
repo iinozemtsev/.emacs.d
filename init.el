@@ -147,6 +147,38 @@
 (use-package markdown-mode :straight t)
 (use-package vscdark-theme :straight t)
 
+(use-package doom-themes
+  :ensure t
+  :straight t
+  ;; Optional: Enable bold/italics for Doom themes
+  :custom
+  (doom-themes-enable-bold t)
+  (doom-themes-enable-italic t)
+  :config
+  (defun my/toggle-theme ()
+    "Toggle between Doom Bluloco Light and Dark."
+    (interactive)
+    (if (custom-theme-enabled-p 'doom-bluloco-light)
+        ;; If Light is active -> Switch to Dark
+        (progn
+          (disable-theme 'doom-bluloco-light)
+          (load-theme 'doom-bluloco-dark t)
+          (message "Theme: Dark"))
+
+      ;; Else (Dark is active or no theme) -> Switch to Light
+      (progn
+        ;; Disable dark if it's on, just to be clean
+        (when (custom-theme-enabled-p 'doom-bluloco-dark)
+          (disable-theme 'doom-bluloco-dark))
+        (load-theme 'doom-bluloco-light t)
+        (message "Theme: Light")))
+
+    ;; Force modeline refresh to fix any graphical glitches
+    (force-mode-line-update t))
+
+  ;; Bind F12 to the toggle
+  (global-set-key (kbd "<f12>") 'my/toggle-theme))
+
 (use-package multiple-cursors
   :bind (("C-c a" . mc/edit-lines)
          ("C-c m" . mc/mark-all-like-this))
@@ -216,6 +248,7 @@
 
   ;; 3. Hook it into the kill-ring
   (setq interprogram-cut-function 'my/smart-clipboard-cut))
+
 (setq backup-by-copying t
       backup-directory-alist '(("." . "~/.emacs.d/auto-saves"))
       delete-old-versions t)
