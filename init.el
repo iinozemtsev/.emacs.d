@@ -55,10 +55,10 @@
 (use-package emacs
   :custom
   (ring-bell-function 'ignore)
-  (blink-cursor-mode 0)
   (confirm-kill-emacs 'y-or-n-p)
   (column-number-mode t)
   :init
+  (blink-cursor-mode -1)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
