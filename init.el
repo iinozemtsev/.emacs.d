@@ -294,8 +294,9 @@
   (password-cache-expiry 600))
 
 (use-package no-littering
-  :custom
-  (auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+  :demand t
+  :config
+  (no-littering-theme-backups))
 
 (use-package files
   :straight nil
