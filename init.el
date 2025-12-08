@@ -1,6 +1,33 @@
+;; --------------------------------------------------
+;; Basic settings
+;; --------------------------------------------------
+(setq gc-cons-threshold (* 100 1024 1024)) ;; Speed up startup
+(setq read-process-output-max (* 1024 1024))
 (setq custom-file (concat user-emacs-directory "custom.el"))
-(when (file-exists-p custom-file)
-  (load custom-file))
+
+;; --------------------------------------------------
+;; Host-specific variables
+;; --------------------------------------------------
+(defvar my/emacs-profile
+  (let ((profile-file (expand-file-name ".emacs-profile" user-emacs-directory)))
+    (if (file-exists-p profile-file)
+        ;; Read explicit .emacs-profile
+        (with-temp-buffer
+          (insert-file-contents profile-file)
+          (string-trim (buffer-string)))
+      ;; Fallback: Sanitized system-name
+      (car (split-string (system-name) "\\."))))
+  "The configuration profile identifier for this machine.")
+
+;; Load the profile (defines vars like my/is-corp-network, my/font-size)
+(let ((host-config (expand-file-name (format "hosts/%s.el" my/emacs-profile) user-emacs-directory)))
+  (if (file-exists-p host-config)
+      (load host-config)
+    (message "Warning: Host config not found: %s" host-config)))
+
+;; --------------------------------------------------
+;; Bootstrap straight.el
+;; --------------------------------------------------
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -19,22 +46,25 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
-
-'(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-
+(setq straight-use-package-by-default t)
 (require 'use-package)
 
-(setq visible-bell t)
-(setq ring-bell-function 'ignore)
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-
-(blink-cursor-mode 0)
+;; --------------------------------------------------
+;; Real config starts here
+;; --------------------------------------------------
+(use-package emacs
+  :custom
+  (ring-bell-function 'ignore)
+  (blink-cursor-mode 0)
+  (confirm-kill-emacs 'y-or-n-p)
+  (column-number-mode t)
+  :init
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (setq-default indent-tabs-mode nil))
 
 (use-package general :straight t)
-
-(use-package bazel :straight t)
 
 (use-package yaml-mode :straight t)
 
@@ -81,10 +111,9 @@
 (use-package swift-mode :straight t)
 
 (use-package dired
+  :straight nil
   :init
-  (defun my-hide-details ()
-    (dired-hide-details-mode 1))
-  :hook ('dired-mode . my-hide-details))
+  :hook ('dired-mode . dired-hide-details-mode))
 
 (use-package smartparens :straight t
   :config
@@ -95,12 +124,16 @@
   (sp-use-paredit-bindings)
   :custom (sp-escape-quotes-after-insert nil))
 
-(if (display-graphic-p)
-    (scroll-bar-mode -1))
+(use-package emacs
+  :config
+  (add-to-list 'default-frame-alist '(font . "JetBrains Mono-12"))
+  (scroll-bar-mode -1)) ;; TODO: do I need it here?
 
-(setq confirm-kill-emacs 'y-or-n-p)
-(if (display-graphic-p)
-    (server-start))
+(use-package server
+  :straight nil
+  :config
+  (unless (server-running-p)
+    (server-start)))
 
 (use-package window-numbering
   :init
@@ -117,8 +150,6 @@
 
 (use-package markdownfmt
   :straight t)
-
-(set-frame-font "JetBrains Mono 12" nil t)
 
 (use-package ligature
   :config
@@ -137,83 +168,100 @@
                               "<:<" ";;;"))
   (global-ligature-mode t) :straight t)
 
-(if (eq system-type 'darwin)
-    (progn
-      (setq mac-command-modifier 'meta)
-      (setq mac-right-command-modifier 'super)
-      (set-frame-font "JetBrains Mono 20" nil t)))
+(use-package emacs
+  :if (eq system-type 'darwin)
+  :custom
+  ;; Key Modifiers
+  (mac-command-modifier 'meta)       ;; Command -> Meta
+  (mac-right-command-modifier 'super) ;; Right Command -> Super
+
+  :config
+  ;; Font: Using default-frame-alist is better for Daemon/Client setups
+  (add-to-list 'default-frame-alist '(font . "JetBrains Mono-20")))
 
 (use-package dart-mode :straight t)
 (use-package markdown-mode :straight t)
-(use-package vscdark-theme :straight t)
 
 (use-package doom-themes
-  :ensure t
-  :straight t
-  ;; Optional: Enable bold/italics for Doom themes
+  :demand t
   :custom
   (doom-themes-enable-bold t)
   (doom-themes-enable-italic t)
+  (custom-safe-themes t) ;; Trust all themes so it doesn't ask "Are you sure?"
+  
   :config
+  ;; 1. The Toggle Function (Cleaned up)
   (defun my/toggle-theme ()
     "Toggle between Doom Bluloco Light and Dark."
     (interactive)
     (if (custom-theme-enabled-p 'doom-bluloco-light)
-        ;; If Light is active -> Switch to Dark
         (progn
           (disable-theme 'doom-bluloco-light)
           (load-theme 'doom-bluloco-dark t)
           (message "Theme: Dark"))
+      ;; Else: Switch to Light
+      ;; We disable the dark theme first to prevent "theme bleeding"
+      ;; (where colors mix weirdly)
+      (disable-theme 'doom-bluloco-dark)
+      (load-theme 'doom-bluloco-light t)
+      (message "Theme: Light")))
 
-      ;; Else (Dark is active or no theme) -> Switch to Light
-      (progn
-        ;; Disable dark if it's on, just to be clean
-        (when (custom-theme-enabled-p 'doom-bluloco-dark)
-          (disable-theme 'doom-bluloco-dark))
-        (load-theme 'doom-bluloco-light t)
-        (message "Theme: Light")))
+  ;; 2. Optional: Enable Doom's tweaks for Org-mode headings/lists
+  ;; (It makes them look much nicer)
+  (doom-themes-org-config)
 
-    ;; Force modeline refresh to fix any graphical glitches
-    (force-mode-line-update t))
+  ;; 3. LOAD THE DEFAULT (The Fix!)
+  ;; This ensures you start in Dark mode automatically.
+  (load-theme 'doom-bluloco-light t)
 
-  ;; Bind F12 to the toggle
-  (global-set-key (kbd "<f12>") 'my/toggle-theme))
+  :bind
+  ("<f12>" . my/toggle-theme))
 
 (use-package multiple-cursors
   :bind (("C-c a" . mc/edit-lines)
          ("C-c m" . mc/mark-all-like-this))
   :straight t)
 
-(defun toggle-quotes ()
-  "Toggle single/double quotes and flip the internal quotes."
-  (interactive)
-  (save-excursion
-    (re-search-backward "[\"']")
-    (let* ((start (point))
-           (old-c (char-after start))
-           new-c)
-      (setq new-c
-            (cl-case old-c
-              (?\" "'")
-              (?\' "\"")))
-      (setq old-c (char-to-string old-c))
-      (delete-char 1)
-      (insert new-c)
-      (re-search-forward old-c)
-      (backward-char 1)
-      (let ((end (point)))
+(use-package emacs
+  :config
+  (defun my/toggle-quotes ()
+    "Toggle single/double quotes and flip the internal quotes."
+    (interactive)
+    (save-excursion
+      (re-search-backward "[\"']")
+      (let* ((start (point))
+             (old-c (char-after start))
+             new-c)
+        (setq new-c
+              (cond ((eq old-c ?\") "'")
+                    ((eq old-c ?\') "\"")))
+        (setq old-c (char-to-string old-c))
         (delete-char 1)
         (insert new-c)
-        (replace-string new-c old-c nil (1+ start) end)))))
-(global-set-key (kbd "M-\"") 'toggle-quotes)
-(global-set-key (kbd "M-g f") 'project-find-file)
-(global-set-key (kbd "C-c C-r") 'ff-find-other-file)
-(setq-default indent-tabs-mode nil)
+        (re-search-forward old-c)
+        (backward-char 1)
+        (let ((end (point)))
+          (delete-char 1)
+          (insert new-c)
+          (replace-string new-c old-c nil (1+ start) end)))))
+
+  :bind
+  ("M-\"" . my/toggle-quotes))
+
+(use-package project
+  :straight nil
+  :bind
+  ("M-g f" . project-find-file))
+
+(use-package find-file
+  :straight nil
+  :bind ("C-c C-r" . ff-find-other-file))
 
 (use-package company :straight t
   :config (global-company-mode))
 
 (use-package eglot
+  :straight nil
   :bind
   ("C-c C-f" . eglot-format-buffer)
   ("M-g ?" . eldoc-doc-buffer)
@@ -223,37 +271,46 @@
   ("M-n n ". flymake-goto-next-error)
   ("M-n p ". flymake-goto-prev-error)
   ("M-g i ". eglot-inlay-hints-mode)
-  ("M-g r" . vc-git-grep)
   ("M-/" . company-complete))
 
-(use-package my-terminal-keyboard
-  :no-require t
-  :ensure nil
+(use-package vc :straight nil
+  :bind  ("M-g r" . vc-git-grep))
+
+(use-package emacs
   :config
-  ;; 1. Define the OSC 52 function
-  (defun my/yank-to-clipboard-osc52 (text &optional push)
-    (let ((inhibit-eol-conversion t)
-          (base64-text (base64-encode-string
-                        (encode-coding-string text 'utf-8)
-                        t)))
-      (send-string-to-terminal
-       (format "\e]52;c;%s\a" base64-text))))
+  ;; Enable clipboard integration in the terminal (Emacs 29+)
+  ;; This sends the OSC 52 escape sequence automatically when you copy.
+  (setq xterm-extra-capabilities '(setSelection)))
 
-  ;; 2. Define the Smart Dispatcher (Terminal vs GUI)
-  (defun my/smart-clipboard-cut (text &optional push)
-    (if (display-graphic-p)
-        (when (fboundp 'gui-select-text)
-          (gui-select-text text))
-      (my/yank-to-clipboard-osc52 text push)))
+(use-package tramp
+  :straight nil
+  :custom
+  (tramp-use-auth-sources nil)
+  (auth-source-save-behavior nil)
+  (tramp-allow-unsafe-temporary-files t))
 
-  ;; 3. Hook it into the kill-ring
-  (setq interprogram-cut-function 'my/smart-clipboard-cut))
+(use-package password-cache
+  :custom
+  (password-cache-expiry 600))
 
-(setq backup-by-copying t
-      backup-directory-alist '(("." . "~/.emacs.d/auto-saves"))
-      delete-old-versions t)
+(use-package no-littering
+  :custom
+  (auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
-(setq auto-save-file-name-transforms
-  `((".*" "~/.emacs.d/auto-saves/" t)))
+(use-package files
+  :straight nil
+  :custom
+  (backup-by-copying t)       ;; Don't clobber symlinks
+  (version-control t)         ;; Use version numbers for backups (foo.txt.~1~)
+  (delete-old-versions t)     ;; Delete excess backups silently
+  (kept-new-versions 6)       ;; Keep last 6 new versions
+  (kept-old-versions 2))      ;; Keep first 2 original versions
 
-(setq column-number-mode t)
+(use-package misc
+  :straight nil  ;; Built-in library
+  :bind
+  ;; Rebind M-z from standard 'zap-to-char' to 'zap-up-to-char'
+  ("M-z" . zap-up-to-char))
+
+(when (file-exists-p custom-file)
+  (load custom-file))
