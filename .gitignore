@@ -14,4 +14,5 @@
 /straight/
 /eshell/
 /projects
-/auto-saves
+/auto-saves/
+.emacs-profile
