@@ -1,1 +1,1 @@
-(defconst my/is-corp-network t)
+(defconst my/is-corp t)

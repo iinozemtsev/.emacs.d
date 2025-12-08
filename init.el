@@ -315,3 +315,9 @@
 
 (when (file-exists-p custom-file)
   (load custom-file))
+
+;;--------------------------------------------------
+;; Corp stuff
+;;--------------------------------------------------
+(when (bound-and-true-p my/is-corp)
+  (load (expand-file-name "lisp/corp-utils.el" user-emacs-directory)))

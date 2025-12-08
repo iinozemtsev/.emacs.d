@@ -1,1 +1,1 @@
-(defconst my/is-cloudtop t)
+(defconst my/is-corp t)
