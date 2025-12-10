@@ -277,10 +277,11 @@
   :bind  ("M-g r" . vc-git-grep))
 
 (use-package emacs
-  :config
+  :custom
   ;; Enable clipboard integration in the terminal (Emacs 29+)
   ;; This sends the OSC 52 escape sequence automatically when you copy.
-  (setq xterm-extra-capabilities '(setSelection)))
+  (xterm-extra-capabilities '(setSelection))
+  (xterm-max-cut-lengthe (* 5 1024 1024)))
 
 (use-package tramp
   :straight nil
