@@ -74,7 +74,16 @@
   (add-to-list 'auto-mode-alist '("\\.gn\\'" . gn-mode))
   (add-to-list 'auto-mode-alist '("\\.gni\\'" . gn-mode)))
 
-(use-package consult :straight t)
+(use-package consult :straight t
+  :bind (;; This is the VS Code "Cmd+Shift+F" equivalent
+         ("M-g ." . my/consult-ripgrep-at-project-root))
+  :config
+  ;; 1. Use the project root for searches automatically
+  (defun my/consult-ripgrep-at-project-root ()
+    "Run consult-ripgrep at the project root."
+    (interactive)
+    (let ((project-root (project-root (project-current t))))
+      (consult-ripgrep project-root))))
 
 (use-package csv-mode :straight t)
 
