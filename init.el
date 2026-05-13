@@ -323,6 +323,12 @@
   ;; Rebind M-z from standard 'zap-to-char' to 'zap-up-to-char'
   ("M-z" . zap-up-to-char))
 
+;; mouse inside tmux.
+(use-package emacs
+  :if (not (display-graphic-p))
+  :config
+  (xterm-mouse-mode 1))
+
 (when (file-exists-p custom-file)
   (load custom-file))
 
