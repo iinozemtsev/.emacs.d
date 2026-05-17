@@ -332,6 +332,13 @@
 (when (file-exists-p custom-file)
   (load custom-file))
 
+(setq column-number-mode t)
+
+(use-package caddyfile-mode
+  :straight t
+  :mode (("Caddyfile\\'" . caddyfile-mode)
+         ("caddy\\.conf\\'" . caddyfile-mode)))
+
 ;;--------------------------------------------------
 ;; Corp stuff
 ;;--------------------------------------------------
