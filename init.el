@@ -57,11 +57,13 @@
   (ring-bell-function 'ignore)
   (confirm-kill-emacs 'y-or-n-p)
   (column-number-mode t)
+  (visible-cursor nil)
+  (blink-cursor-mode nil)
   :init
-  (blink-cursor-mode -1)
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+  :config
   (setq-default indent-tabs-mode nil))
 
 (use-package general :straight t)
