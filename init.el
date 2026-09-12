@@ -19,11 +19,18 @@
       (car (split-string (system-name) "\\."))))
   "The configuration profile identifier for this machine.")
 
-;; Load the profile (defines vars like my/is-corp-network, my/font-size)
+;; Load the profile (defines vars like my/is-corp, my/enable-apheleia)
 (let ((host-config (expand-file-name (format "hosts/%s.el" my/emacs-profile) user-emacs-directory)))
   (if (file-exists-p host-config)
       (load host-config)
     (message "Warning: Host config not found: %s" host-config)))
+
+;; Append user binary directories if they exist on this host
+(dolist (dir (list (expand-file-name "~/.local/bin")
+                   (expand-file-name "~/go/bin")))
+  (when (file-directory-p dir)
+    (add-to-list 'exec-path dir t)
+    (setenv "PATH" (concat (getenv "PATH") path-separator dir))))
 
 ;; --------------------------------------------------
 ;; Bootstrap straight.el
@@ -159,8 +166,16 @@
   :bind (("M-g s" . magit-status))
   :straight t)
 
-(use-package markdownfmt
-  :straight t)
+(use-package apheleia
+  :straight t
+  :if (bound-and-true-p my/enable-apheleia)
+  :config
+  (apheleia-global-mode +1)
+  (setf (alist-get 'markdown-mode apheleia-mode-alist) 'prettier-markdown)
+  (setf (alist-get 'gfm-mode apheleia-mode-alist) 'prettier-markdown)
+  :bind (:map markdown-mode-map
+         ("C-c C-f" . apheleia-format-buffer)))
+
 
 (use-package ligature
   :config
